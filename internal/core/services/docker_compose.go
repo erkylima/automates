@@ -2,35 +2,27 @@ package services
 
 import (
 	"github.com/qbem-repos/dockerizing-service/internal/core/domain"
+	"github.com/qbem-repos/dockerizing-service/internal/core/ports"
 )
 
 type DockerComposeService struct {
+	serializer ports.DockerComposeSerializer
 }
 
-func NewDockerComposeService() *DockerComposeService {
-	return &DockerComposeService{}
+func NewDockerComposeService(serializer ports.DockerComposeSerializer) *DockerComposeService {
+	return &DockerComposeService{serializer: serializer}
 }
 
-func (s *DockerComposeService) Generate(packages []string) (*domain.DockerCompose, error) {
+func (s *DockerComposeService) Generate(stack domain.Stack) (*[]byte, error) {
 	services := []domain.Service{}
-	for _, p := range packages {
-		if p == "nginx" {
-			service := NewNginxService("reverseProxy", "1.25")
-			services = append(services, *service)
-		} else {
-			services = append(services, domain.Service{
-				ContainerName: "name",
-				Build:         ".",
-				Ports:         []string{"80:80"},
-				Volumes:       []string{"/var/run/docker.sock:/tmp/docker.sock:ro"},
-				DependsOn:     []string{""},
-				Environment:   []string{""},
-			},
-			)
-		}
+	for _, p := range stack.Technology {
+		service := NewDockerService(p, domain.Build{
+			Context:    "../",
+			Dockerfile: ".devops/Dockerfile",
+		})
+		services = append(services, *service)
 	}
-
-	return &domain.DockerCompose{
+	dockerCompose := &domain.DockerCompose{
 		Services: services,
 		Version:  "3.7",
 		Networks: []string{
@@ -39,18 +31,39 @@ func (s *DockerComposeService) Generate(packages []string) (*domain.DockerCompos
 		Volumes: []string{
 			"das",
 		},
-	}, nil
+	}
+
+	encoded, err := s.Serializer().Encode(dockerCompose)
+	if err != nil {
+		return nil, err
+	}
+	return &encoded, nil
 }
 
-func NewNginxService(name, version string) *domain.Service {
-	service := &domain.Service{
-		ContainerName: name,
-		Build:         "",
-		Image:         "nginx:" + version,
-		Ports:         []string{"80:80"},
-		Volumes:       []string{"/var/run/docker.sock:/tmp/docker.sock:ro"},
-		DependsOn:     []string{""},
-		Environment:   []string{""},
+func (s *DockerComposeService) Serializer() ports.DockerComposeSerializer {
+	return s.serializer
+}
+
+func NewDockerService(technology domain.Technology, build domain.Build) *domain.Service {
+	var service *domain.Service
+	if build.Context == "" {
+		service = &domain.Service{
+			ContainerName: technology.ContainerName,
+			Image:         technology.Image + ":" + technology.ImageVersion,
+			Ports:         technology.Ports,
+			Volumes:       technology.Volumes,
+			DependsOn:     technology.DependsOn,
+			Environment:   technology.Environment,
+		}
+	} else {
+		service = &domain.Service{
+			ContainerName: technology.ContainerName,
+			Build:         build,
+			Ports:         technology.Ports,
+			Volumes:       technology.Volumes,
+			DependsOn:     technology.DependsOn,
+			Environment:   technology.Environment,
+		}
 	}
 	return service
 }

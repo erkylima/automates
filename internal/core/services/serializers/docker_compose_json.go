@@ -1,27 +1,28 @@
 package serializers
 
 import (
+	"encoding/json"
+
 	"github.com/pkg/errors"
 	"github.com/qbem-repos/dockerizing-service/internal/core/domain"
-	"gopkg.in/yaml.v3"
 )
 
-type dockerComposeYaml struct{}
+type dockerComposeJson struct{}
 
-func NewDockerComposeYaml() *dockerComposeJson {
+func NewDockerComposeJson() *dockerComposeJson {
 	return &dockerComposeJson{}
 }
 
-func (d *dockerComposeYaml) Decode(input []byte) (*domain.DockerCompose, error) {
+func (d *dockerComposeJson) Decode(input []byte) (*domain.DockerCompose, error) {
 	dockercompose := &domain.DockerCompose{}
-	if err := yaml.Unmarshal(input, &dockercompose); err != nil {
+	if err := json.Unmarshal(input, &dockercompose); err != nil {
 		return nil, errors.Wrap(err, "serializer.dockercompose.decode")
 	}
 	return dockercompose, nil
 }
 
-func (d *dockerComposeYaml) Encode(input *domain.DockerCompose) ([]byte, error) {
-	rawMsg, err := yaml.Marshal(input)
+func (d *dockerComposeJson) Encode(input *domain.DockerCompose) ([]byte, error) {
+	rawMsg, err := json.Marshal(input)
 	if err != nil {
 		return nil, errors.Wrap(err, "serializer.dockercompose.encode")
 	}

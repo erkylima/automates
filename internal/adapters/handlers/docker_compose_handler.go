@@ -10,10 +10,10 @@ import (
 )
 
 type DevelopersHandler struct {
-	svc ports.DockerComposeService
+	svc ports.ConfigurationService
 }
 
-func NewDevelopersHandler(dockerComposeService ports.DockerComposeService) *DevelopersHandler {
+func NewDevelopersHandler(dockerComposeService ports.ConfigurationService) *DevelopersHandler {
 	return &DevelopersHandler{
 		svc: dockerComposeService,
 	}
@@ -27,11 +27,55 @@ func (h *DevelopersHandler) Generate(ctx *gin.Context) {
 		HandleError(ctx, http.StatusBadRequest, errors.Wrap(err, err.Error()))
 		return
 	}
-	docker_compose, err := h.svc.Generate([]string{"nginx", "web"})
+	technologies := []domain.Technology{
+		{
+			ContainerName: "PHP",
+		},
+		{
+			ContainerName: "NodeJS",
+		},
+		{
+			ContainerName: "Go",
+		},
+		{
+			ContainerName: "Java",
+		},
+		{
+			ContainerName: "Python",
+		},
+		{
+			ContainerName: "C++",
+		},
+		{
+			ContainerName: "C#",
+		},
+		{
+			ContainerName: "C",
+		},
+		{
+			ContainerName: "C++",
+		},
+		{
+			ContainerName: "C#",
+		},
+		{
+			ContainerName: "C",
+		},
+	}
+	stack := &domain.Stack{
+		Technology: technologies,
+	}
+
+	encoded_docker_compose, err := h.svc.Generate(*stack)
 	if err != nil {
 		HandleError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
-	ctx.YAML(http.StatusOK, docker_compose)
+	decoded_docker_compose, err := h.svc.Serializer().Decode(*encoded_docker_compose)
+	if err != nil {
+		HandleError(ctx, http.StatusInternalServerError, err)
+		return
+	}
+	ctx.YAML(http.StatusOK, decoded_docker_compose)
 }

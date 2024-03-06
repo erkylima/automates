@@ -9,7 +9,7 @@ import (
 	"github.com/qbem-repos/dockerizing-service/internal/core/ports"
 )
 
-func InitDockerComposeRouter(svc ports.DockerComposeService) {
+func InitDockerComposeRouter(svc ports.ConfigurationService) {
 	router := gin.Default()
 	pprof.Register(router)
 	v1 := router.Group("/v1")
