@@ -1,20 +1,20 @@
 package serializers
 
 import (
+	"github.com/goccy/go-yaml"
 	"github.com/pkg/errors"
 	"github.com/qbem-repos/dockerizing-service/internal/core/domain"
-	"gopkg.in/yaml.v3"
 )
 
 type dockerComposeYaml struct{}
 
-func NewDockerComposeYaml() *dockerComposeJson {
-	return &dockerComposeJson{}
+func NewDockerComposeYaml() *dockerComposeYaml {
+	return &dockerComposeYaml{}
 }
 
 func (d *dockerComposeYaml) Decode(input []byte) (*domain.DockerCompose, error) {
 	dockercompose := &domain.DockerCompose{}
-	if err := yaml.Unmarshal(input, &dockercompose); err != nil {
+	if err := yaml.Unmarshal(input, dockercompose); err != nil {
 		return nil, errors.Wrap(err, "serializer.dockercompose.decode")
 	}
 	return dockercompose, nil
