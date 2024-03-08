@@ -9,7 +9,7 @@ import (
 // repo <- service -> serializer  -> http
 
 func main() {
-	serializer := serializers.NewDockerComposeYaml()
+	serializer := serializers.NewDockerComposeJson()
 	service := services.NewDockerComposeService(serializer)
 	api.InitDockerComposeRouter(service)
 }

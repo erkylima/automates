@@ -15,7 +15,7 @@ func InitDockerComposeRouter(svc ports.ConfigurationService) {
 	v1 := router.Group("/v1")
 
 	developersHandler := handlers.NewDevelopersHandler(svc)
-	v1.POST("/developers", developersHandler.Generate)
+	v1.GET("/developers", developersHandler.Generate)
 
 	err := router.Run(":4242")
 	if err != nil {

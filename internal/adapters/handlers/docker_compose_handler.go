@@ -77,5 +77,5 @@ func (h *DevelopersHandler) Generate(ctx *gin.Context) {
 		HandleError(ctx, http.StatusInternalServerError, err)
 		return
 	}
-	ctx.YAML(http.StatusOK, decoded_docker_compose)
+	ctx.JSON(http.StatusOK, decoded_docker_compose)
 }
